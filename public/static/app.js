@@ -653,6 +653,7 @@ const app = {
       return `
         <div class="flex justify-end mb-3">
           <div class="chat-bubble">
+            <div class="text-xs text-gray-500 mb-1 text-right font-medium">あなた (${this.escapeHtml(msg.displayName)})</div>
             <div class="bg-green-500 text-white rounded-lg px-4 py-2 ${msg.isDeleted ? 'italic opacity-70' : ''}">
               <div class="break-words">${this.escapeHtml(displayBody)}</div>
               <div class="text-xs opacity-80 mt-1 flex justify-between items-center">
@@ -667,7 +668,7 @@ const app = {
       return `
         <div class="flex justify-start mb-3">
           <div class="chat-bubble">
-            <div class="text-xs text-gray-600 mb-1 font-medium">${this.escapeHtml(msg.displayName)}</div>
+            <div class="text-xs text-gray-600 mb-1 font-medium">${this.escapeHtml(msg.displayName)}${msg.loginId ? ` (@${this.escapeHtml(msg.loginId)})` : ''}</div>
             <div class="bg-white border border-gray-200 rounded-lg px-4 py-2 ${msg.isDeleted ? 'italic opacity-70' : ''}">
               <div class="break-words">${this.escapeHtml(displayBody)}</div>
               <div class="text-xs text-gray-500 mt-1 flex justify-between items-center">

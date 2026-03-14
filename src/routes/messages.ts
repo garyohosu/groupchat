@@ -20,7 +20,7 @@ messages.get('/', authMiddleware, async (c: AuthContext) => {
 
     let query = `
       SELECT m.id, m.user_id, m.body, m.is_deleted, m.created_at, m.updated_at,
-             u.display_name
+             u.display_name, u.login_id
       FROM messages m
       JOIN users u ON m.user_id = u.id
       WHERE m.room_id = ?
@@ -40,6 +40,7 @@ messages.get('/', authMiddleware, async (c: AuthContext) => {
       id: row.id,
       userId: row.user_id,
       displayName: row.display_name,
+      loginId: row.login_id,
       body: row.is_deleted === 1 ? '' : row.body,
       isDeleted: row.is_deleted === 1,
       createdAt: row.created_at,
@@ -94,7 +95,7 @@ messages.get('/changes', authMiddleware, async (c: AuthContext) => {
     const result = await db
       .prepare(
         `SELECT m.id, m.user_id, m.body, m.is_deleted, m.created_at, m.updated_at,
-                u.display_name
+                u.display_name, u.login_id
          FROM messages m
          JOIN users u ON m.user_id = u.id
          WHERE m.room_id = ? AND m.updated_at > ?
@@ -107,6 +108,7 @@ messages.get('/changes', authMiddleware, async (c: AuthContext) => {
       id: row.id,
       userId: row.user_id,
       displayName: row.display_name,
+      loginId: row.login_id,
       body: row.is_deleted === 1 ? '' : row.body,
       isDeleted: row.is_deleted === 1,
       createdAt: row.created_at,
@@ -189,7 +191,7 @@ messages.post('/', authMiddleware, async (c: AuthContext) => {
     const message = await db
       .prepare(
         `SELECT m.id, m.user_id, m.body, m.is_deleted, m.created_at, m.updated_at,
-                u.display_name
+                u.display_name, u.login_id
          FROM messages m
          JOIN users u ON m.user_id = u.id
          WHERE m.id = ?`
@@ -203,6 +205,7 @@ messages.post('/', authMiddleware, async (c: AuthContext) => {
         id: message.id,
         userId: message.user_id,
         displayName: message.display_name,
+        loginId: message.login_id,
         body: message.body,
         isDeleted: false,
         createdAt: message.created_at,
