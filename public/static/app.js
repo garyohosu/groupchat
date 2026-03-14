@@ -522,11 +522,23 @@ const app = {
       if (!body) return
       
       try {
-        await api.sendMessage(1, body)
+        const res = await api.sendMessage(1, body)
         input.value = ''
         charCount.textContent = '0'
         input.style.height = 'auto'
-        // Message will appear via polling
+
+        // 即時反映（ポーリング待ちだと投稿直後に見えない）
+        if (res && res.message) {
+          const idx = state.messages.findIndex(m => m.id === res.message.id)
+          if (idx >= 0) {
+            state.messages[idx] = res.message
+          } else {
+            state.messages.push(res.message)
+          }
+          state.lastUpdateTime = new Date().toISOString()
+          this.renderMessages()
+          this.scrollToBottom()
+        }
       } catch (error) {
         alert(error.message)
       }

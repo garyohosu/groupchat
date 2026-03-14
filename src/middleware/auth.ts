@@ -33,7 +33,19 @@ export async function authMiddleware(c: Context<{ Bindings: Bindings }>, next: N
   // Find session and check expiration
   const session = await db
     .prepare(
-      `SELECT s.*, u.id, u.login_id, u.display_name, u.bio, u.role, u.is_active, u.created_at
+      `SELECT
+          s.id AS session_id,
+          s.user_id AS session_user_id,
+          s.session_token,
+          s.expires_at,
+          s.created_at AS session_created_at,
+          u.id AS user_id,
+          u.login_id,
+          u.display_name,
+          u.bio,
+          u.role,
+          u.is_active,
+          u.created_at AS user_created_at
        FROM sessions s
        JOIN users u ON s.user_id = u.id
        WHERE s.session_token = ? AND s.expires_at > datetime('now')`
@@ -73,12 +85,12 @@ export async function authMiddleware(c: Context<{ Bindings: Bindings }>, next: N
 
   // Attach user to context
   const user: AuthenticatedUser = {
-    id: session.id,
+    id: session.user_id,
     loginId: session.login_id,
     displayName: session.display_name,
     bio: session.bio,
     role: session.role,
-    createdAt: session.created_at
+    createdAt: session.user_created_at
   }
 
   c.set('user', user)
