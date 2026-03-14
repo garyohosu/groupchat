@@ -314,7 +314,7 @@ const views = {
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">登録日</label>
-                <input type="text" value="${new Date(user.createdAt).toLocaleDateString('ja-JP')}" disabled
+                <input type="text" value="${new Date(String(user.createdAt).replace(' ', 'T') + 'Z').toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })}" disabled
                   class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600">
               </div>
               
@@ -647,7 +647,12 @@ const app = {
     const canDelete = isOwn || isAdmin
     
     const displayBody = msg.isDeleted ? 'このメッセージは削除されました' : msg.body
-    const time = new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+    const utc = String(msg.createdAt).replace(' ', 'T') + 'Z'
+    const time = new Date(utc).toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Tokyo'
+    })
     
     if (isOwn) {
       return `
@@ -769,7 +774,7 @@ const app = {
           <div>
             <div class="font-medium">${this.escapeHtml(user.displayName)}</div>
             <div class="text-sm text-gray-600">ID: ${this.escapeHtml(user.loginId)} | 役割: ${user.role === 'admin' ? '管理者' : '一般'}</div>
-            <div class="text-xs text-gray-500">登録: ${new Date(user.createdAt).toLocaleDateString('ja-JP')}</div>
+            <div class="text-xs text-gray-500">登録: ${new Date(String(user.createdAt).replace(' ', 'T') + 'Z').toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })}</div>
           </div>
           <div>
             ${user.role !== 'admin' ? `
