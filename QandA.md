@@ -199,4 +199,118 @@
 
 ---
 
-*全件回答・確定済み。このシートはクローズ。*
+---
+
+## 追加レビューで確定した事項
+
+## Q15. 論理削除したメッセージを、ポーリング中の他クライアントへどう反映するか？
+
+**採用: A) `updated_at` ベースで更新分も再取得できる API にする**
+
+- `after=<messageId>` だけでは削除更新が取れない
+- 削除専用APIを増やすより単純
+- 既存の `updated_at` を活かせる
+- MVPでも他クライアントへの削除反映が自然にできる
+
+**仕様反映:**
+- 新着ポーリングは `GET /api/messages/changes?roomId=1&since=<timestamp>` を使用
+- 返却対象は新規投稿と更新済み投稿（削除含む）
+- `GET /api/messages` は初回表示と過去ログ取得用に整理
+
+**関連spec:** §7.4, §7.6, §9.3
+
+---
+
+## Q16. プロフィール画面の「ユーザーID」は、数値IDと loginId のどちらを表示するか？
+
+**採用: B) 表示するのは `loginId`**
+
+- 数値 `id` は内部管理用として扱うほうが自然
+- ユーザーが認識しやすいのは `loginId`
+- プロフィールに出す「ID」として自然
+- APIにもすでに `loginId` がある
+
+**仕様反映:**
+- プロフィール画面の表示項目は「ユーザーID」ではなく「ログインID」に変更
+- 数値の `id` は内部識別子として非表示
+
+**関連spec:** §7.7, §9.2
+
+---
+
+## Q17. APIエラー時のHTTPステータスとレスポンス形式を統一するか？
+
+**採用: 統一する**
+
+- フロント実装が楽になる
+- バリデーションエラー・認証失敗・権限不足・重複IDなどの扱いを揃えられる
+
+**共通エラーレスポンス:**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "LOGIN_ID_ALREADY_EXISTS",
+    "message": "このログインIDは既に使用されています"
+  }
+}
+```
+
+**ステータス方針:**
+- `400 Bad Request`: 入力不正、必須不足、形式不正
+- `401 Unauthorized`: 未ログイン、認証失敗、期限切れセッション
+- `403 Forbidden`: 権限不足、停止ユーザー
+- `404 Not Found`: 対象データなし
+- `409 Conflict`: `loginId` 重複など競合
+- `429 Too Many Requests`: 連投制限、ログイン試行過多
+- `500 Internal Server Error`: 想定外エラー
+
+**代表的な `error.code`:**
+- `VALIDATION_ERROR`
+- `UNAUTHORIZED`
+- `SESSION_EXPIRED`
+- `FORBIDDEN`
+- `ACCOUNT_DISABLED`
+- `NOT_FOUND`
+- `LOGIN_ID_ALREADY_EXISTS`
+- `RATE_LIMITED`
+- `INTERNAL_ERROR`
+
+**関連spec:** §9
+
+---
+
+## Q18. sessions.expires_at の運用ルールはどうするか？
+
+**採用: A) 認証時に `expires_at > now` を必須条件にし、期限切れ行は見つけ次第削除**
+
+- 一番わかりやすい
+- DBにゴミをためにくい
+- 別途メンテジョブ必須にしなくてよい
+- 無料枠運用に合う
+
+**仕様反映:**
+- Cookie から `session_token` を取得
+- `sessions` を検索
+- 該当なしなら `401 Unauthorized`
+- `expires_at <= now` ならその行を削除して `401 Unauthorized`
+- 有効なら認証成功
+
+**期限切れ時のレスポンス例:**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "SESSION_EXPIRED",
+    "message": "セッションの有効期限が切れました。再度ログインしてください"
+  }
+}
+```
+
+**関連spec:** §7.2, §8.4, §9.1, §11
+
+---
+
+*Q1-Q18 は回答済み・確定。spec.md に反映済み。*
