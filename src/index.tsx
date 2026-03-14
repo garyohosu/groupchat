@@ -18,7 +18,7 @@ app.use('/api/*', csrfMiddleware)
 
 // Mount API routes
 app.route('/api/auth', auth)
-app.route('/api/users', users)
+app.route('/api', users)
 app.route('/api/messages', messages)
 app.route('/api/admin', admin)
 

@@ -114,7 +114,7 @@ users.put('/me', authMiddleware, async (c: AuthContext) => {
 /**
  * GET /api/users - Get user list (for regular users)
  */
-users.get('/', authMiddleware, async (c: AuthContext) => {
+users.get('/users', authMiddleware, async (c: AuthContext) => {
   try {
     const db = c.env.DB
 
