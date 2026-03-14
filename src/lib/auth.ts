@@ -1,7 +1,7 @@
 // PBKDF2-SHA-256 password hashing utilities
-// Spec: 310,000 iterations, 16 bytes salt, 32 bytes hash
+// Cloudflare Workers の上限に合わせて iterations は 100,000 以下
 
-const ITERATIONS = 310000
+const ITERATIONS = 100000
 const SALT_LENGTH = 16
 const HASH_LENGTH = 32
 
