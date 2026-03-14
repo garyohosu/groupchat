@@ -65,6 +65,13 @@ const api = {
     })
   },
 
+  async changePassword(currentPassword, newPassword, newPasswordConfirm) {
+    return this.request('/api/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword, newPasswordConfirm })
+    })
+  },
+
   async getMessages(roomId = 1, before = null) {
     const url = before
       ? `/api/messages?roomId=${roomId}&before=${before}`
@@ -316,7 +323,39 @@ const views = {
               
               <button type="submit"
                 class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-200 font-medium">
-                更新
+                プロフィール更新
+              </button>
+            </form>
+
+            <hr class="my-6">
+
+            <form id="passwordForm" class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800">パスワード変更</h3>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">現在のパスワード</label>
+                <input type="password" id="currentPassword" required minlength="8" maxlength="128"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">新しいパスワード</label>
+                <input type="password" id="newPassword" required minlength="8" maxlength="128"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">新しいパスワード（確認）</label>
+                <input type="password" id="newPasswordConfirm" required minlength="8" maxlength="128"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              </div>
+
+              <div id="passwordError" class="text-red-500 text-sm hidden"></div>
+              <div id="passwordSuccess" class="text-green-500 text-sm hidden"></div>
+
+              <button type="submit"
+                class="w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 transition duration-200 font-medium">
+                パスワードを変更
               </button>
             </form>
           </div>
@@ -512,6 +551,32 @@ const app = {
         successEl.classList.remove('hidden')
         errorEl.classList.add('hidden')
         
+        setTimeout(() => {
+          successEl.classList.add('hidden')
+        }, 3000)
+      } catch (error) {
+        errorEl.textContent = error.message
+        errorEl.classList.remove('hidden')
+        successEl.classList.add('hidden')
+      }
+    })
+
+    const pwForm = document.getElementById('passwordForm')
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const currentPassword = document.getElementById('currentPassword').value
+      const newPassword = document.getElementById('newPassword').value
+      const newPasswordConfirm = document.getElementById('newPasswordConfirm').value
+      const errorEl = document.getElementById('passwordError')
+      const successEl = document.getElementById('passwordSuccess')
+
+      try {
+        await api.changePassword(currentPassword, newPassword, newPasswordConfirm)
+        pwForm.reset()
+        successEl.textContent = 'パスワードを変更しました'
+        successEl.classList.remove('hidden')
+        errorEl.classList.add('hidden')
         setTimeout(() => {
           successEl.classList.add('hidden')
         }, 3000)
